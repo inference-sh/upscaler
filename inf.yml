@@ -1,0 +1,3 @@
+name: inference-sh/upscaler  # Change this to your username/appname
+repo: https://github.com/inference-sh/upscaler.git  # Change this to your repo
+version: 0.1.0
