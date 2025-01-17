@@ -19,7 +19,7 @@ class UpscaleMode(Enum):
     CHESS = 1
     NONE = 2
 
-class UpscaleSFMode(Enum):
+class SeamFixMode(Enum):
     NONE = 0
     BAND_PASS = 1
     HALF_TILE = 2
@@ -36,7 +36,7 @@ class UpscaleConfig:
     redraw_padding: int = 32
     redraw_mask_blur: int = 8
     save_redraw: bool = True
-    seam_fix_mode: UpscaleSFMode = UpscaleSFMode.NONE
+    seam_fix_mode: SeamFixMode = SeamFixMode.NONE
     seam_fix_denoise: float = 1.0
     seam_fix_width: int = 64
     seam_fix_mask_blur: int = 8
@@ -69,7 +69,7 @@ class Upscaler:
             image = self.process_tiles(image, process_fn)
         
         # Fix seams if needed
-        if self.config.seam_fix_mode != UpscaleSFMode.NONE:
+        if self.config.seam_fix_mode != SeamFixMode.NONE:
             image = self.process_seams(image, process_fn)
         
         return image
@@ -166,7 +166,7 @@ class Upscaler:
     def create_seam_masks(self) -> List[Tuple[Image.Image, Tuple[int, int, int, int]]]:
         masks = []
 
-        if self.config.seam_fix_mode == UpscaleSFMode.BAND_PASS:
+        if self.config.seam_fix_mode == SeamFixMode.BAND_PASS:
             gradient = Image.linear_gradient("L")
             mirror_gradient = Image.new("L", (256, 256), "black")
             mirror_gradient.paste(gradient.resize((256, 128), resample=Image.BICUBIC), (0, 0))
@@ -190,7 +190,7 @@ class Upscaler:
                 mask.paste(row_gradient, (0, y_pos))
                 masks.append((mask, (0, y_pos, self.config.target_width, y_pos + self.config.seam_fix_width)))
 
-        elif self.config.seam_fix_mode in [UpscaleSFMode.HALF_TILE, UpscaleSFMode.HALF_TILE_PLUS_INTERSECTIONS]:
+        elif self.config.seam_fix_mode in [SeamFixMode.HALF_TILE, SeamFixMode.HALF_TILE_PLUS_INTERSECTIONS]:
             gradient = Image.linear_gradient("L")
 
             row_gradient = Image.new("L", (self.config.tile_width, self.config.tile_height), "black")
@@ -229,7 +229,7 @@ class Upscaler:
                     mask.paste(col_gradient, (x_pos, y_pos))
                     masks.append((mask, (x_pos, y_pos, x_pos + self.config.tile_width, y_pos + self.config.tile_height)))
 
-            if self.config.seam_fix_mode == UpscaleSFMode.HALF_TILE_PLUS_INTERSECTIONS:
+            if self.config.seam_fix_mode == SeamFixMode.HALF_TILE_PLUS_INTERSECTIONS:
                 rg = Image.radial_gradient("L").resize((self.config.tile_width, self.config.tile_height), resample=Image.BICUBIC)
                 rg = ImageOps.invert(rg)
                 for yi in range(self.rows - 1):
@@ -285,7 +285,7 @@ class Upscaler:
         processing_width = self.config.tile_width
         processing_height = self.config.tile_height
 
-        if self.config.seam_fix_mode == UpscaleSFMode.BAND_PASS:
+        if self.config.seam_fix_mode == SeamFixMode.BAND_PASS:
             processing_width = self.config.tile_width * 2
             processing_height = self.config.tile_height * 2
         
@@ -305,7 +305,7 @@ class Upscaler:
             seam_mask = mask
             seam_mask = ImageUtils.resize_image(2, mask, image.width, image.height)
             
-            if self.config.seam_fix_mask_blur > 0 and self.config.seam_fix_mode != UpscaleSFMode.BAND_PASS:
+            if self.config.seam_fix_mask_blur > 0 and self.config.seam_fix_mode != SeamFixMode.BAND_PASS:
                 np_mask = np.array(seam_mask)
                 kernel_size = 2 * int(2.5 * self.config.seam_fix_mask_blur + 0.5) + 1
                 np_mask = cv2.GaussianBlur(np_mask, (kernel_size, kernel_size), self.config.seam_fix_mask_blur)
@@ -440,7 +440,7 @@ def upscale(
     redraw_mask_blur: int = 8,
     save_redraw: bool = True,
     # Seam fixing configuration
-    seam_fix_mode: UpscaleSFMode = UpscaleSFMode.NONE,
+    seam_fix_mode: SeamFixMode = SeamFixMode.NONE,
     seam_fix_denoise: float = 1.0,
     seam_fix_width: int = 64,
     seam_fix_mask_blur: int = 8,
