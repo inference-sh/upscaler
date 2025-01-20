@@ -100,7 +100,7 @@ class App(BaseApp):
         # Save and return result
         output_path = "/tmp/upscaled.png"
         result.save(output_path)
-        return AppOutput(result=File(output_path))
+        return AppOutput(result=File.from_path(output_path))
 
     async def unload(self):
         """Clean up resources"""
