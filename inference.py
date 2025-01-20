@@ -3,7 +3,7 @@ from diffusers import StableDiffusionXLImg2ImgPipeline
 import torch
 from PIL import Image
 from .upscale import Upscaler, UpscaleConfig, UpscaleMode, SeamFixMode
-
+from typing import Optional
 class AppInput(BaseAppInput):
     image: File
     target_width: int = 2048
@@ -18,7 +18,7 @@ class AppOutput(BaseAppOutput):
 
 class App(BaseApp):
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
-    pipe: StableDiffusionXLImg2ImgPipeline
+    pipe: Optional[StableDiffusionXLImg2ImgPipeline] = None
 
     async def setup(self):
         """Initialize SDXL model"""
