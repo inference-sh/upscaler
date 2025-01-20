@@ -2,7 +2,7 @@ from infsh import BaseApp, BaseAppInput, BaseAppOutput, File
 from diffusers import StableDiffusionXLImg2ImgPipeline
 import torch
 from PIL import Image
-from .upscale import Upscaler, UpscaleConfig, UpscaleMode, SeamFixMode
+from .upscale import upscale, UpscaleMode, SeamFixMode
 from typing import Optional
 from io import BytesIO
 from urllib.request import urlopen
@@ -82,25 +82,17 @@ class App(BaseApp):
                 generator=torch.Generator(self.device).manual_seed(input_data.seed)
             ).images[0]
 
-        # Create upscale configuration
-        config = UpscaleConfig(
+        # Process the image using direct upscale function
+        result = upscale(
+            image=image,
             target_width=input_data.target_width,
             target_height=input_data.target_height,
             tile_width=1024,
             tile_height=1024,
+            redraw_padding=32,
+            redraw_mask_blur=8,
             upscale_mode=UpscaleMode.CHESS,
             seam_fix_mode=SeamFixMode.NONE,
-            redraw_padding=32,
-            redraw_mask_blur=8
-        )
-
-        # Create upscaler instance
-        upscaler = Upscaler(config=config)
-
-        # Process the image using the Upscaler class
-        result = upscaler.process_image(
-            image=image,
-            config=config,
             upscale_fn=upscale_fn,
             process_fn=process_fn
         )
