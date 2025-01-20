@@ -5,12 +5,11 @@ from PIL import Image
 from .upscale import upscale, UpscaleMode, SeamFixMode
 from typing import Optional
 from io import BytesIO
-from urllib.request import urlopen
 from diffusers import FluxInpaintPipeline
 from RealESRGAN import RealESRGAN
 from huggingface_hub import hf_hub_download
 import os
-
+import urllib.request
 # Ensure HF transfer is enabled
 os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "1"
 
@@ -19,7 +18,7 @@ def load_image_from_url_or_path(url_or_path: str) -> Image.Image:
     if url_or_path.startswith("http") or url_or_path.startswith("https"):
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
         req = urllib.request.Request(url_or_path, headers=headers)
-        return Image.open(BytesIO(urlopen(req).read()))
+        return Image.open(BytesIO(urllib.request.urlopen(req).read()))
     else:
         return Image.open(url_or_path)
     
