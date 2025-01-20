@@ -17,7 +17,9 @@ os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "1"
 def load_image_from_url_or_path(url_or_path: str) -> Image.Image:
     print(f"Loading image from URL or path: {url_or_path}")
     if url_or_path.startswith("http") or url_or_path.startswith("https"):
-        return Image.open(BytesIO(urlopen(url_or_path).read()))
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+        req = urllib.request.Request(url_or_path, headers=headers)
+        return Image.open(BytesIO(urlopen(req).read()))
     else:
         return Image.open(url_or_path)
     
