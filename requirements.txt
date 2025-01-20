@@ -8,5 +8,5 @@ opencv_contrib_python_headless==4.10.0.84
 opencv_python==4.10.0.84
 opencv_python_headless==4.7.0.72
 Pillow==11.1.0
-RealESRGAN==0.3.0
+git+https://github.com/sberbank-ai/Real-ESRGAN.git
 torch==2.5.1
