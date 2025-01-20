@@ -4,6 +4,16 @@ import torch
 from PIL import Image
 from .upscale import Upscaler, UpscaleConfig, UpscaleMode, SeamFixMode
 from typing import Optional
+from io import BytesIO
+from urllib.request import urlopen
+
+def load_image_from_url_or_path(url_or_path: str) -> Image.Image:
+    print(f"Loading image from URL or path: {url_or_path}")
+    if url_or_path.startswith("http") or url_or_path.startswith("https"):
+        return Image.open(BytesIO(urlopen(url_or_path).read()))
+    else:
+        return Image.open(url_or_path)
+    
 class AppInput(BaseAppInput):
     image: File
     target_width: int = 2048
@@ -30,7 +40,7 @@ class App(BaseApp):
     async def run(self, input_data: AppInput) -> AppOutput:
         """Run upscaling with SDXL"""
         # Load input image
-        image = Image.open(input_data.image.path)
+        image = load_image_from_url_or_path(input_data.image.path)
 
         # Create upscale configuration
         config = UpscaleConfig(
