@@ -85,6 +85,11 @@
         "default": 7.5,
         "title": "Guidance Scale",
         "type": "number"
+      },
+      "seed": {
+        "default": 0,
+        "title": "Seed",
+        "type": "integer"
       }
     },
     "required": [
