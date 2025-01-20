@@ -53,7 +53,7 @@ class App(BaseApp):
         )
 
         # Create upscaler instance
-        upscaler = Upscaler()
+        upscaler = Upscaler(config=config)
 
         def upscale_fn(img: Image.Image, scale_factor: int) -> Image.Image:
             # Simple resize for initial upscaling
