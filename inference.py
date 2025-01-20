@@ -98,7 +98,7 @@ class App(BaseApp):
         )
 
         # Save and return result
-        output_path = input_data.image.path.parent / "upscaled.png"
+        output_path = "/tmp/upscaled.png"
         result.save(output_path)
         return AppOutput(result=File(output_path))
 
