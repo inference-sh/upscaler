@@ -17,9 +17,11 @@ class AppOutput(BaseAppOutput):
     result: File
 
 class App(BaseApp):
+    device: str = "cuda" if torch.cuda.is_available() else "cpu"
+    pipe: StableDiffusionXLImg2ImgPipeline
+
     async def setup(self):
         """Initialize SDXL model"""
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.pipe = StableDiffusionXLImg2ImgPipeline.from_pretrained(
             "stabilityai/stable-diffusion-xl-refiner-1.0",
             torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
