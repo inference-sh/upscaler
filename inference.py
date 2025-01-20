@@ -61,6 +61,27 @@ class App(BaseApp):
         # Load input image
         image = load_image_from_url_or_path(input_data.image.path)
 
+        def upscale_fn(img: Image.Image, scale_factor: int) -> Image.Image:
+            esrgan_result = self.esrgan.predict(img)
+            return esrgan_result.resize(
+                (img.width * scale_factor, img.height * scale_factor),
+                Image.Resampling.LANCZOS
+            )
+
+        def process_fn(img: Image.Image, mask: Image.Image) -> Image.Image:
+            return self.pipe(
+                prompt=input_data.prompt,
+                image=img,
+                mask_image=mask,
+                width=img.width,
+                height=img.height,
+                strength=input_data.strength,
+                guidance_scale=input_data.guidance_scale,
+                num_inference_steps=int(10/input_data.strength),
+                max_sequence_length=512,
+                generator=torch.Generator(self.device).manual_seed(input_data.seed)
+            ).images[0]
+
         # Create upscale configuration
         config = UpscaleConfig(
             target_width=input_data.target_width,
@@ -75,37 +96,6 @@ class App(BaseApp):
 
         # Create upscaler instance
         upscaler = Upscaler(config=config)
-
-        def upscale_fn(img: Image.Image, scale_factor: int) -> Image.Image:
-            esrgan_result = self.esrgan.predict(img)
-            return esrgan_result.resize(
-                (img.width * scale_factor, img.height * scale_factor),
-                Image.Resampling.LANCZOS
-            )
-
-        def process_fn(img: Image.Image, mask: Image.Image, coords: tuple) -> Image.Image:
-            # Extract region to process
-            x1, y1, x2, y2 = coords
-            region = img.crop(coords)
-            region_mask = mask.crop(coords) if mask else None
-            
-            # Generate with FLUX
-            output = self.pipe(
-                prompt=input_data.prompt,
-                image=region,
-                mask_image=region_mask,
-                width=region.width,
-                height=region.height,
-                strength=input_data.strength,
-                guidance_scale=input_data.guidance_scale,
-                num_inference_steps=int(10/input_data.strength),
-                max_sequence_length=512,
-                generator=torch.Generator(self.device).manual_seed(input_data.seed)
-            ).images[0]
-
-            # Paste back the result
-            img.paste(output, (x1, y1))
-            return img
 
         # Process the image using the Upscaler class
         result = upscaler.process_image(
