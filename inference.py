@@ -1,5 +1,4 @@
-from infsh import BaseApp, BaseAppInput, BaseAppOutput, File
-from diffusers import StableDiffusionXLImg2ImgPipeline
+from inferencesh import BaseApp, BaseAppInput, BaseAppOutput, File
 import torch
 from PIL import Image
 from .upscale import upscale, UpscaleMode, SeamFixMode
